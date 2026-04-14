@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cardio Prescribing Aid</title>
+  <style>
+    :root {
+      --bg: #f7f6f2;
+      --surface: #ffffff;
+      --surface-alt: #f0eeea;
+      --text: #222222;
+      --text-muted: #666666;
+      --primary: #01696f;
+      --primary-soft: #e0f0f1;
+      --danger: #a12c2c;
+      --warning: #b36700;
+      --success: #287a2e;
+      --border: #d4d1ca;
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-10: 40px;
+      --transition-fast: 150ms ease-out;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--space-6) var(--space-4);
+      gap: var(--space-4);
+    }
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+    header h1 {
+      font-size: 1.75rem;
+      font-weight: 650;
+    }
+    header p {
+      color: var(--text-muted);
+      max-width: 70ch;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
+      gap: var(--space-4);
+      align-items: flex-start;
+    }
+    @media (max-width: 840px) {
+      .layout { grid-template-columns: minmax(0, 1fr); }
+    }
+    .sidebar {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      padding: var(--space-3);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      position: sticky;
+      top: var(--space-4);
+    }
+    .sidebar h2 {
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: var(--space-2);
+    }
+    .nav-btn {
+      text-align: left;
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-md);
+      border: 1px solid transparent;
+      background: transparent;
+      cursor: pointer;
+      font-size: 0.95rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+    }
+    .nav-btn span.label {
+      font-weight: 600;
+    }
+    .nav-btn span.sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .nav-btn:hover {
+      background: var(--surface-alt);
+      border-color: var(--border);
+    }
+    .nav-btn.active {
+      background: var(--primary-soft);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .content {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      padding: var(--space-5);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+    .condition-section { display: none; }
+    .condition-section.active { display: block; }
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin-top: 4px;
+    }
+    .pill {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface-alt);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .pill.first { border-color: var(--success); color: var(--success); }
+    .pill.second { border-color: var(--warning); color: var(--warning); }
+    .pill.third { border-color: var(--text-muted); color: var(--text-muted); }
+    .pill.contra { border-color: var(--danger); color: var(--danger); }
+    h2.section-title {
+      font-size: 1.2rem;
+      margin-bottom: 2px;
+    }
+    .section-note {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: var(--space-2);
+    }
+    ul {
+      margin-left: 1.1rem;
+      display: grid;
+      gap: 4px;
+    }
+    li { margin-bottom: 2px; }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: var(--space-3);
+    }
+    .card {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--surface-alt);
+      padding: var(--space-3);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.9rem;
+    }
+    .card h3 {
+      font-size: 0.95rem;
+      margin-bottom: 2px;
+    }
+    .card strong.label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+    .warning-text { color: var(--danger); font-weight: 600; }
+    .tip-text { color: var(--success); }
+    .highlight {
+      background: #fff8e6;
+      border-left: 3px solid var(--warning);
+      padding: var(--space-3);
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+    }
+    .highlight h3 { font-size: 0.95rem; margin-bottom: 4px; }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.85rem;
+      background: #f1efea;
+      padding: 1px 4px;
+      border-radius: 4px;
+    }
+
+    .context-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+      align-items: center;
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      padding: var(--space-3);
+      font-size: 0.9rem;
+    }
+    .context-toggle-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      align-items: center;
+    }
+    .ctx-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface-alt);
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .ctx-label input { accent-color: var(--primary); }
+    .context-summary {
+      flex: 1;
+      min-width: 220px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .context-summary strong { color: var(--primary); }
+    .card.interactive {
+      border-left: 3px solid var(--primary);
+      background: #f4fafb;
+    }
+    .card.interactive h3 {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .card.interactive small {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .field-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin: var(--space-2) 0;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+    .field-row label {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .field-row input[type="number"],
+    .field-row select {
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      font-size: 0.85rem;
+      min-width: 80px;
+    }
+    .calc-output {
+      margin-top: var(--space-2);
+      font-size: 0.85rem;
+    }
+    .calc-output strong { color: var(--primary); }
+
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header>
+      <h1>Cardiovascular Prescribing Aid</h1>
+      </p>
+      <section class="context-bar" aria-label="Patient context modifiers">
+        <div class="context-toggle-group">
+          <span style="font-size:0.8rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted);">Patient context</span>
+          <label class="ctx-label">
+            <input type="checkbox" id="ctx-pregnant" />
+            Pregnant / planning pregnancy
+          </label>
+          <label class="ctx-label">
+            <input type="checkbox" id="ctx-egfr" />
+            eGFR < 30 mL/min/1.73m²
+          </label>
+          <label class="ctx-label">
+            <input type="checkbox" id="ctx-hfref" />
+            HFrEF present
+          </label>
+        </div>
+        <div class="context-summary" id="context-summary">
+          <strong>Tips:</strong> toggle these if relevant to surface extra cautions (e.g. avoid ACEi/ARB & statins in pregnancy, adjust doses in severe CKD, avoid non‑DHP CCBs in HFrEF).
+        </div>
+      </section>
+    </header>
+    <div class="layout">
+      <nav class="sidebar" aria-label="Conditions">
+        <h2>Conditions</h2>
+        <button class="nav-btn active" data-target="htn">
+          <span class="label">Hypertension</span>
+          <span class="sub">Primary BP management</span>
+        </button>
+        <button class="nav-btn" data-target="hf">
+          <span class="label">Heart failure</span>
+          <span class="sub">HFrEF & HFpEF</span>
+        </button>
+        <button class="nav-btn" data-target="dyslipidaemia">
+          <span class="label">Dyslipidaemia</span>
+          <span class="sub">Lipid lowering</span>
+        </button>
+        <button class="nav-btn" data-target="angina">
+          <span class="label">Stable angina</span>
+          <span class="sub">Chronic coronary syndrome</span>
+        </button>
+        <button class="nav-btn" data-target="acs">
+          <span class="label">Acute coronary syndrome</span>
+          <span class="sub">STEMI & NSTEACS</span>
+        </button>
+        <button class="nav-btn" data-target="arrhythmia">
+          <span class="label">Atrial fibrillation</span>
+          <span class="sub">Rate, rhythm, stroke prevention</span>
+        </button>
+        <button class="nav-btn" data-target="renal">
+          <span class="label">Renal & dosing</span>
+          <span class="sub">eGFR & CrCl checks</span>
+        </button>
+      </nav>
+
+      <main class="content">
+        <!-- Hypertension -->
+        <section id="htn" class="condition-section active">
+          <h2 class="section-title">Hypertension – stepwise approach</h2>
+          <p class="section-note">Applies to adult primary hypertension in the Australian setting; adjust for individual comorbidities, pregnancy and frailty.</p>
+          <ol style="margin-left:1.1rem; display:grid; gap:4px;">
+            <li><strong>Confirm diagnosis</strong> – repeat BP on separate visits and exclude secondary causes (renal disease, primary aldosteronism, endocrine causes, sleep apnoea).</li>
+            <li><strong>Assess absolute CVD risk</strong> – use Aus CVD Risk Calculator; some groups are automatically high risk (e.g. CKD with eGFR &lt;45 mL/min/1.73m², familial hypercholesterolaemia).</li>
+            <li><strong>Implement lifestyle measures for all</strong> – DASH-style diet, weight loss, sodium restriction, alcohol reduction, regular aerobic activity.</li>
+            <li><strong>Decide on drug therapy</strong>:
+              <ul>
+                <li>Start if ASCVD risk high (≥10%) or BP ≥160/100 mmHg regardless of risk.</li>
+                <li>Consider in intermediate risk (5–10%) or target organ damage.</li>
+              </ul>
+            </li>
+            <li><strong>Choose first-line agent (uncomplicated HTN)</strong>:
+              <div class="pill-row">
+                <span class="pill first">First line</span>
+              </div>
+              <ul>
+                <li>ACE inhibitor or ARB (sartan).</li>
+                <li>Dihydropyridine CCB (e.g. amlodipine, felodipine).</li>
+                <li>Low-dose thiazide/thiazide-like diuretic, especially ≥65 years.</li>
+              </ul>
+            </li>
+            <li><strong>Tailor to comorbidities</strong> – see key combinations and contraindications below.</li>
+            <li><strong>If BP uncontrolled</strong> on maximally tolerated first agent:
+              <ul>
+                <li>Add a <em>second drug from a complementary class</em> rather than simply up-titrating one agent.</li>
+                <li>Preferred pairs: ACEi/ARB + CCB; ACEi/ARB + thiazide; CCB + thiazide.</li>
+              </ul>
+            </li>
+            <li><strong>Resistant hypertension</strong> – if on ≥3 appropriate agents (including a diuretic) with good adherence and still uncontrolled:
+              <ul>
+                <li>Recheck adherence, white-coat effect, NSAIDs and other contributors.</li>
+                <li>Consider adding mineralocorticoid antagonist or other third-line drug under specialist guidance.</li>
+              </ul>
+            </li>
+          </ol>
+
+          <section class="card interactive" aria-label="CVD risk helper">
+            <h3>CVD risk helper <small>(Aus CVD Risk Calculator companion)</small></h3>
+            <p style="font-size:0.85rem; color:var(--text-muted);">Record the risk category from the Aus CVD Risk Calculator and see how it guides BP and lipid therapy.</p>
+            <div class="field-row">
+              <label for="cvd-risk">5-year CVD risk category:</label>
+              <select id="cvd-risk">
+                <option value="">Select</option>
+                <option value="low">Low (&lt;5%)</option>
+                <option value="intermediate">Intermediate (5–10%)</option>
+                <option value="high">High (≥10%)</option>
+                <option value="clinical">Clinically high risk (e.g. CKD, FH, established ASCVD)</option>
+              </select>
+            </div>
+            <div class="calc-output" id="cvd-risk-output"></div>
+          </section>
+
+          <h2 class="section-title">Drug classes – key points</h2>
+          <div class="card-grid">
+            <article class="card">
+              <h3>ACE inhibitors (e.g. perindopril, ramipril, enalapril)</h3>
+              <div class="pill-row">
+                <span class="pill first">First line</span>
+              </div>
+              <p><strong>Favour when:</strong> diabetes with albuminuria, CKD, HFrEF, post-MI, high ASCVD risk.</p>
+              <p class="warning-text"><strong>Contra / avoid:</strong> pregnancy, history of angioedema, bilateral renal artery stenosis, K⁺ &gt;5 mmol/L, combination with ARB or aliskiren.</p>
+              <p><strong>Watch for:</strong> rise in creatinine and K⁺ (check baseline and within 1–2 weeks), symptomatic hypotension, dry cough, rare angioedema.</p>
+            </article>
+            <article class="card">
+              <h3>ARBs (sartans – e.g. irbesartan, candesartan, valsartan)</h3>
+              <div class="pill-row">
+                <span class="pill first">First line</span>
+              </div>
+              <p><strong>Use when:</strong> ACEi-indiced cough or intolerance; same indications as ACEi.</p>
+              <p class="warning-text"><strong>Contra / avoid:</strong> pregnancy, previous ARB-related angioedema, bilateral renal artery stenosis, combination with ACEi or potassium-sparing diuretics without close monitoring.</p>
+              <p><strong>Watch for:</strong> hyperkalaemia, renal function decline, rare sprue-like enteropathy (especially with olmesartan).</p>
+            </article>
+            <article class="card">
+              <h3>Dihydropyridine CCBs (e.g. amlodipine, lercanidipine)</h3>
+              <div class="pill-row">
+                <span class="pill first">First line</span>
+              </div>
+              <p><strong>Favour when:</strong> older patients, isolated systolic HTN, concomitant angina, asthma/COPD where β-blockers are problematic.</p>
+              <p class="warning-text"><strong>Caution:</strong> symptomatic aortic stenosis, severe hepatic impairment; may worsen peripheral oedema or cause reflex tachycardia.</p>
+              <p><strong>Watch for:</strong> ankle swelling, flushing, headache, gingival hyperplasia; avoid strong CYP3A4 inhibitors (e.g. azoles, clarithromycin, grapefruit).</p>
+            </article>
+            <article class="card">
+              <h3>Thiazide(-like) diuretics (e.g. hydrochlorothiazide, indapamide)</h3>
+              <div class="pill-row">
+                <span class="pill first">First line ≥65y</span>
+              </div>
+              <p><strong>Favour when:</strong> older adults, volume-dependent HTN; can combine with ACEi/ARB.</p>
+              <p class="warning-text"><strong>Caution / avoid:</strong> gout, significant hyponatraemia, hypokalaemia, uncontrolled diabetes, severe renal impairment.</p>
+              <p><strong>Watch for:</strong> Na⁺/K⁺, urate, glucose and lipids; counsel about dizziness and photosensitivity.</p>
+            </article>
+            <article class="card">
+              <h3>β-blockers</h3>
+              <div class="pill-row">
+                <span class="pill second">Second line</span>
+              </div>
+              <p><strong>Use when:</strong> compelling indication – angina, post-MI, HFrEF (use HF-specific agents), rate control in AF.</p>
+              <p class="warning-text"><strong>Contra / avoid:</strong> uncontrolled asthma, severe COPD, bradycardia, second/third-degree AV block, decompensated HF.</p>
+              <p><strong>Do not combine</strong> with verapamil (risk of severe bradycardia/heart block); use caution with diltiazem.</p>
+            </article>
+          </div>
+
+          <div class="highlight">
+            <h3>Hypertension – red flags</h3>
+            <ul>
+              <li>BP ≥180/110 mmHg with symptoms (headache, visual change, SOB, chest pain) – urgent assessment.</li>
+              <li>Pregnancy: avoid ACEi/ARB; use labetalol, nifedipine or methyldopa as per obstetric guidance.</li>
+              <li>Check for NSAIDs, OTC decongestants and oral contraceptives contributing to poor control.</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Heart failure -->
+        <section id="hf" class="condition-section">
+          <h2 class="section-title">Heart failure – pharmacological core</h2>
+          <p class="section-note">Focus on HFrEF; HFpEF emphasises risk-factor control, diuretics for congestion and SGLT2 inhibitors.</p>
+          <ol style="margin-left:1.1rem; display:grid; gap:4px;">
+            <li><strong>Confirm type</strong> – echocardiogram to distinguish HFrEF (LVEF &lt;50%, esp. ≤40%) from HFpEF (LVEF ≥50%).</li>
+            <li><strong>Stabilise congestion</strong> – loop diuretic (e.g. furosemide) to relieve pulmonary and peripheral oedema; titrate to least dose that controls symptoms.</li>
+            <li><strong>Start guideline-directed quadruple therapy for HFrEF</strong> (unless contraindicated):
+              <div class="pill-row">
+                <span class="pill first">Essential core</span>
+              </div>
+              <ul>
+                <li>RAAS inhibitor – ACEi, ARB or ARNI (sacubitril/valsartan).</li>
+                <li>HF-specific β-blocker – bisoprolol, carvedilol, metoprolol CR, nebivolol.</li>
+                <li>Mineralocorticoid receptor antagonist – spironolactone or eplerenone.</li>
+                <li>SGLT2 inhibitor – empagliflozin or dapagliflozin (benefit with or without diabetes).</li>
+              </ul>
+            </li>
+            <li><strong>Introduce agents early</strong> – start low doses of all four as soon as clinically feasible, then up-titrate every 2–4 weeks as tolerated.</li>
+            <li><strong>Add-on options for persistent symptoms</strong> – ivabradine (sinus rhythm, HR ≥70 on max β-blocker), digoxin, vericiguat or device therapy under specialist care.</li>
+          </ol>
+
+          <h2 class="section-title">Key drug cautions</h2>
+          <div class="card-grid">
+            <article class="card">
+              <h3>RAAS inhibition (ACEi, ARB, ARNI)</h3>
+              <p><strong>Avoid dual blockade</strong> – do not combine ACEi + ARB or add aliskiren.</p>
+              <p class="warning-text"><strong>Contra / avoid:</strong> pregnancy, history of angioedema, bilateral renal artery stenosis, K⁺ &gt;5 mmol/L, severe hypotension.</p>
+              <p><strong>Switching to ARNI:</strong> allow 36 h washout after last ACEi dose to reduce angioedema risk.</p>
+              <p><strong>Monitor:</strong> BP, renal function and K⁺ at baseline and after each titration; watch for symptomatic hypotension and worsening renal function.</p>
+            </article>
+            <article class="card">
+              <h3>MRA (spironolactone, eplerenone)</h3>
+              <p><strong>Benefits:</strong> reduced mortality and HF hospitalisations in HFrEF.</p>
+              <p class="warning-text"><strong>Contra / avoid:</strong> K⁺ ≥5 mmol/L at baseline, severe renal impairment (e.g. eGFR &lt;30 mL/min/1.73m²), Addison disease.</p>
+              <p><strong>Dose hints:</strong> in HFrEF, start spironolactone 12.5–25 mg once daily or eplerenone 25 mg once daily and titrate to 25–50 mg daily if K⁺ and renal function allow; use reduced starting doses when eGFR 30–49 mL/min/1.73m² and avoid initiating if eGFR &lt;30.</p>
+              <p><strong>Monitor:</strong> K⁺ and creatinine at baseline, 1–2 weeks after initiation and dose changes, then every 3–6 months; counsel to avoid potassium supplements and salt substitutes.</p>
+            </article>
+            <article class="card">
+              <h3>HF β-blockers</h3>
+              <p><strong>Do not start</strong> during acute decompensated HF or in patients with fluid overload.</p>
+              <p><strong>Initiation:</strong> very low dose with slow up-titration; transient worsening of HF can occur.</p>
+              <p class="warning-text"><strong>Contra / avoid:</strong> severe bradycardia, advanced AV block without pacemaker, uncontrolled asthma, cardiogenic shock.</p>
+            </article>
+            <article class="card">
+              <h3>Loop diuretics (furosemide, bumetanide)</h3>
+              <p><strong>Use for:</strong> symptom control of congestion; aim for stable dry weight.</p>
+              <p><strong>Monitor:</strong> Na⁺, K⁺, Mg²⁺, creatinine, weight and blood pressure.</p>
+              <p class="warning-text"><strong>Caution:</strong> gout, hypovolaemia, significant hypotension, higher doses in CKD; risk of ototoxicity with high IV doses or combination with other ototoxic drugs.</p>
+            </article>
+          </div>
+
+          <div class="highlight">
+            <h3>HFpEF considerations</h3>
+            <ul>
+              <li>Use SGLT2 inhibitor for all suitable HFpEF patients (reduced CV death/HF admission).</li>
+              <li>Treat precipitating factors (hypertension, AF, ischaemia, obesity, OSA).</li>
+              <li>Avoid routine vasodilators that may worsen symptoms (e.g. high-dose nitrates, hydralazine) unless clear indication.</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Dyslipidaemia -->
+        <section id="dyslipidaemia" class="condition-section">
+          <h2 class="section-title">Dyslipidaemia – treatment ladder</h2>
+          <p class="section-note">Therapy is based on absolute ASCVD risk and LDL level; lifestyle measures underpin all pharmacotherapy.</p>
+          <ol style="margin-left:1.1rem; display:grid; gap:4px;">
+            <li><strong>Assess ASCVD risk</strong> using Aus CVD Risk Calculator and identify automatically high-risk groups (e.g. CKD, familial hypercholesterolaemia).</li>
+            <li><strong>Initiate lifestyle modification</strong> – Mediterranean-style diet, reduced saturated and trans fats, weight loss, increased activity, alcohol reduction, smoking cessation.</li>
+            <li><strong>Start statin</strong> when indicated by risk or LDL (e.g. total cholesterol &gt;7.5 mmol/L or LDL &gt;5 mmol/L irrespective of risk).
+              <div class="pill-row">
+                <span class="pill first">First line</span>
+              </div>
+            </li>
+            <li><strong>Recheck lipids ~6 weeks</strong> after initiation or dose change; compare to LDL, non-HDL and triglyceride targets by risk category.</li>
+            <li><strong>If LDL not at target on maximally tolerated statin</strong>:
+              <ul>
+                <li>Add ezetimibe.</li>
+                <li>If still above target and meets criteria, add PCSK9 inhibitor (evolocumab or inclisiran).</li>
+              </ul>
+            </li>
+            <li><strong>If triglycerides remain high</strong> despite statin and lifestyle:
+              <ul>
+                <li>Add high-dose omega-3 (2–4 g EPA+DHA per day);</li>
+                <li>Consider fenofibrate when triglycerides &gt;10 mmol/L or persistent elevation.</li>
+              </ul>
+            </li>
+          </ol>
+
+          <h2 class="section-title">Key drugs and cautions</h2>
+          <div class="card-grid">
+            <article class="card">
+              <h3>Statins</h3>
+              <div class="pill-row">
+                <span class="pill first">First line</span>
+              </div>
+              <p><strong>High potency:</strong> atorvastatin, rosuvastatin (preferred post-ACS and in very high risk).</p>
+              <p><strong>Watch for:</strong> myalgia, myopathy, raised CK, new-onset diabetes, liver enzyme elevation.</p>
+              <p class="warning-text"><strong>Caution / avoid:</strong> active liver disease, pregnancy and breastfeeding; avoid strong CYP3A4 inhibitors with atorvastatin/simvastatin and excessive grapefruit juice.</p>
+            </article>
+            <article class="card">
+              <h3>Ezetimibe</h3>
+              <div class="pill-row">
+                <span class="pill second">Add-on</span>
+              </div>
+              <p>Use with statin when LDL target not achieved; alternative if statin intolerance.</p>
+              <p><strong>Watch for:</strong> muscle symptoms, elevated liver enzymes (especially with statin), rare hypersensitivity.</p>
+            </article>
+            <article class="card">
+              <h3>PCSK9 inhibitors (evolocumab, inclisiran)</h3>
+              <div class="pill-row">
+                <span class="pill second">Add-on (specialist)</span>
+              </div>
+              <p>Strict authority criteria (familial hypercholesterolaemia or established ASCVD with high LDL despite maximal therapy).</p>
+              <p><strong>Watch for:</strong> injection-site reactions; inclisiran may cause respiratory infections.</p>
+            </article>
+            <article class="card">
+              <h3>Fibrates (fenofibrate, gemfibrozil)</h3>
+              <div class="pill-row">
+                <span class="pill second">TG-focused</span>
+              </div>
+              <p>Use mainly for severe hypertriglyceridaemia and residual high TG despite statin ± fish oil.</p>
+              <p><strong>Dose hints:</strong> fenofibrate 145 mg once daily (use lower doses and careful monitoring when CrCl 30–59 mL/min); gemfibrozil 600 mg twice daily; avoid fibrates when CrCl &lt;30 mL/min.</p>
+              <p class="warning-text"><strong>Contra / avoid:</strong> CrCl &lt;30 mL/min, significant hepatic impairment, history of fibrate-induced photosensitivity or gallstones.</p>
+              <p><strong>Watch for:</strong> GI upset, myopathy (especially with statin), photosensitivity; advise sun protection.</p>
+            </article>
+            <article class="card">
+              <h3>Bile-acid resin (colestyramine) & nicotinic acid</h3>
+              <div class="pill-row">
+                <span class="pill third">Second line</span>
+              </div>
+              <p>Use when first-line options insufficient or contraindicated; often limited by tolerability and interactions.</p>
+              <p><strong>Watch for:</strong> significant GI effects and reduced absorption of other drugs and fat-soluble vitamins with colestyramine; flushing, hepatotoxicity and hyperglycaemia with nicotinic acid.</p>
+            </article>
+          </div>
+
+          <div class="highlight">
+            <h3>Special situations</h3>
+            <ul>
+              <li><strong>Pregnancy:</strong> avoid statins, ezetimibe, fibrates and nicotinic acid; bile-acid resins may be used with caution and specialist input.</li>
+              <li><strong>Combination with other myotoxic drugs</strong> (e.g. some antivirals, azoles, fibrates): check for interactions and consider lower statin doses or alternatives.</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Angina -->
+        <section id="angina" class="condition-section">
+          <h2 class="section-title">Stable angina – chronic management</h2>
+          <p class="section-note">Unstable angina and NSTEACS should follow ACS pathways. This section covers chronic stable angina.</p>
+          <ol style="margin-left:1.1rem; display:grid; gap:4px;">
+            <li><strong>Confirm diagnosis</strong> – typical exertional chest pain relieved by rest or GTN, supported by stress testing/imaging.</li>
+            <li><strong>Optimise secondary prevention</strong> – antiplatelet (usually aspirin), statin, BP control, diabetes and lifestyle risk-factor modification.</li>
+            <li><strong>Provide short-acting GTN</strong> to all patients for symptom relief and pre-exertional prophylaxis.</li>
+            <li><strong>First-line long-term antianginal</strong>:
+              <div class="pill-row">
+                <span class="pill first">First line</span>
+              </div>
+              <ul>
+                <li>β-blocker (e.g. metoprolol, bisoprolol) – preferred, especially with prior MI or HFrEF.</li>
+                <li>Non-dihydropyridine CCB (verapamil, diltiazem) if β-blockers contraindicated.</li>
+              </ul>
+            </li>
+            <li><strong>If symptoms persist</strong> – add dihydropyridine CCB or long-acting nitrate; if still refractory, consider nicorandil, ivabradine or perhexiline with specialist advice.</li>
+            <li><strong>Vasospastic (Prinzmetal) angina</strong> – use CCBs or long-acting nitrates; avoid β-blockers which can worsen spasm.</li>
+          </ol>
+
+          <h2 class="section-title">Nitrates and other antianginals – safety</h2>
+          <div class="card-grid">
+            <article class="card">
+              <h3>Short-acting GTN (sublingual spray)</h3>
+              <p><strong>Use:</strong> 1–2 sprays under tongue at onset; repeat every 5 minutes up to 3 doses. Call ambulance if pain &gt;10 minutes despite 2 doses.</p>
+              <p class="warning-text"><strong>Absolute contraindication:</strong> PDE5 inhibitors (sildenafil, tadalafil, vardenafil, avanafil) within prior 24–48 h – risk of profound hypotension and MI.</p>
+              <p><strong>Counsel:</strong> sit before dosing to avoid syncope; expect headache and flushing; ensure device is primed and not expired.</p>
+            </article>
+            <article class="card">
+              <h3>Long-acting nitrates (isosorbide mononitrate, GTN patch)</h3>
+              <p><strong>Use:</strong> prophylaxis when frequent angina episodes; must include daily nitrate-free interval (e.g. remove patch for 8–12 h or once-daily morning dosing) to prevent tolerance.</p>
+              <p><strong>Watch for:</strong> orthostatic hypotension, headache, ankle swelling.</p>
+            </article>
+            <article class="card">
+              <h3>Nicorandil</h3>
+              <p>Option for refractory angina added to β-blocker or CCB.</p>
+              <p class="warning-text"><strong>Caution / avoid:</strong> combination with PDE5 inhibitors; diverticular disease or history of GI/genital ulcers or fistulae.</p>
+              <p><strong>Counsel:</strong> report any non-healing oral, perianal, GI or skin ulcers promptly.</p>
+            </article>
+            <article class="card">
+              <h3>Ivabradine & perhexiline</h3>
+              <p>Reserved for patients not controlled with, or intolerant of, first-line agents; require specialist initiation and careful monitoring (esp. perhexiline levels and hepatotoxicity).</p>
+            </article>
+          </div>
+        </section>
+
+        <!-- ACS -->
+        <section id="acs" class="condition-section">
+          <h2 class="section-title">Acute coronary syndrome – high-level pharmacotherapy</h2>
+          <p class="section-note">Summarises core drug classes; acute management must follow local ACS protocols and cardiology advice.</p>
+          <ol style="margin-left:1.1rem; display:grid; gap:4px;">
+            <li><strong>Immediate measures (pre-hospital or on arrival)</strong> – aspirin 300 mg chewed, sublingual GTN for pain, opioid if needed, oxygen only if SpO₂ &lt;90%.</li>
+            <li><strong>Classify ACS</strong> – STEMI vs NSTEACS using ECG and high-sensitivity troponin; initiate continuous ECG monitoring.</li>
+            <li><strong>Reperfusion in STEMI</strong> – primary PCI within 120 min preferred; otherwise fibrinolysis (e.g. tenecteplase) plus transfer for angiography.</li>
+            <li><strong>Antithrombotic backbone</strong> for all ACS (unless contraindicated):
+              <ul>
+                <li>Dual antiplatelet therapy (DAPT): aspirin + P2Y₁₂ inhibitor (ticagrelor or prasugrel preferred; clopidogrel if others unsuitable).</li>
+                <li>Parenteral anticoagulant: UFH or LMWH; bivalirudin in selected high-bleeding-risk PCI cases.</li>
+              </ul>
+            </li>
+            <li><strong>NSTEACS</strong> – risk-stratify (e.g. GRACE score) to determine early invasive vs conservative strategy; fibrinolysis is <em>not</em> used.</li>
+            <li><strong>Secondary prevention on discharge</strong> – DAPT for 6–12 months, then single antiplatelet; high-intensity statin; ACEi/ARB; β-blocker if LV dysfunction or other indication; MRA in selected HFrEF; vaccinations and cardiac rehab.</li>
+          </ol>
+
+          <div class="highlight">
+            <h3>Major contraindications / cautions</h3>
+            <ul>
+              <li>Fibrinolysis: prior intracranial haemorrhage, ischaemic stroke within 3 months, intracranial neoplasm or vascular lesion, active bleeding, recent major head trauma.</li>
+              <li>Prasugrel: not for patients not undergoing PCI; avoid in prior stroke/TIA and in very elderly/high bleeding risk.</li>
+              <li>DAPT plus anticoagulation (e.g. in AF): minimise duration of triple therapy; favour DOAC + single antiplatelet once early period has passed.</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Arrhythmia / AF -->
+        <section id="arrhythmia" class="condition-section">
+          <h2 class="section-title">Atrial fibrillation – rate, rhythm, stroke prevention</h2>
+          <p class="section-note">Always treat underlying precipitants (thyroid disease, infection, alcohol, proarrhythmic drugs) before escalating antiarrhythmics.</p>
+          <h3>1. Rate vs rhythm control</h3>
+          <ul>
+            <li><strong>Rate control (often first choice):</strong> β-blocker, diltiazem or verapamil; digoxin in sedentary patients or as add-on.</li>
+            <li><strong>Rhythm control:</strong> electrical cardioversion or antiarrhythmic drugs (e.g. amiodarone, flecainide, sotalol) under specialist guidance.</li>
+          </ul>
+          <div class="card-grid">
+            <article class="card">
+              <h3>Rate control – key cautions</h3>
+              <p class="warning-text"><strong>Do not combine:</strong> β-blocker + verapamil (risk of severe bradycardia/AV block).</p>
+              <p><strong>β-blockers:</strong> avoid in uncontrolled asthma, severe COPD, marked bradycardia or high-grade AV block.</p>
+              <p><strong>Non-DHP CCBs:</strong> avoid in HFrEF and significant bradycardia.</p>
+              <p><strong>Digoxin:</strong> narrow therapeutic index; avoid in second/third-degree AV block without pacemaker, WPW with AF, hypertrophic obstructive cardiomyopathy and significant renal impairment without dose adjustment.</p>
+            </article>
+            <article class="card">
+              <h3>Rhythm control – QT and proarrhythmia</h3>
+              <p><strong>Amiodarone, sotalol and other class III agents</strong> prolong QT and can provoke torsades de pointes, particularly with other QT-prolonging drugs or electrolyte disturbance.</p>
+              <p><strong>Check:</strong> baseline QTc, K⁺, Mg²⁺, renal function and co-medications (e.g. macrolides, azole antifungals, some antipsychotics and antidepressants).</p>
+              <p><strong>Flecainide:</strong> avoid in structural heart disease or ischaemic cardiomyopathy; use with AV nodal blocker to prevent 1:1 atrial flutter conduction.</p>
+            </article>
+          </div>
+
+          <h3>2. Stroke prevention in AF</h3>
+          <ul>
+            <li>Estimate stroke risk (e.g. CHA₂DS₂-VA score); oral anticoagulant generally recommended if score ≥2.</li>
+            <li>Oral anticoagulant options: DOACs (apixaban, rivaroxaban, dabigatran) usually preferred; warfarin for rheumatic mitral stenosis, mechanical valves or severe CKD.</li>
+          </ul>
+          <section class="card interactive" aria-label="CHA2DS2-VA stroke risk calculator">
+            <h3>CHA₂DS₂-VA helper <small>(AF stroke risk estimation)</small></h3>
+            <p style="font-size:0.8rem; color:var(--text-muted);">Score components: CHF (1), HTN (1), Age 75+ (2), Age 65–74 (1), Diabetes (1), Stroke/TIA/SE (2), Vascular disease (1).</p>
+            <div class="field-row">
+              <label for="cha-age">Age group:</label>
+              <select id="cha-age">
+                <option value="">Select</option>
+                <option value="lt65">&lt;65 years</option>
+                <option value="65-74">65–74 years</option>
+                <option value="75plus">≥75 years</option>
+              </select>
+            </div>
+            <div class="field-row">
+              <label><input type="checkbox" id="cha-chf" /> Congestive heart failure / LV dysfunction</label>
+              <label><input type="checkbox" id="cha-htn" /> Hypertension</label>
+              <label><input type="checkbox" id="cha-diabetes" /> Diabetes</label>
+            </div>
+            <div class="field-row">
+              <label><input type="checkbox" id="cha-stroke" /> Prior stroke / TIA / systemic embolism</label>
+              <label><input type="checkbox" id="cha-vascular" /> Vascular disease (e.g. MI, PAD)</label>
+            </div>
+            <div class="calc-output" id="cha-output"></div>
+          </section>
+
+          <div class="card-grid">
+            <article class="card">
+              <h3>DOACs</h3>
+              <p class="warning-text"><strong>Do not use</strong> in mechanical valves or rheumatic mitral stenosis – warfarin only.</p>
+              <p><strong>Dose hints (stroke prevention in AF):</strong> apixaban 5 mg twice daily (2.5 mg twice daily if ≥2 of age ≥80 years, weight ≤60 kg, creatinine ≥133 micromol/L); rivaroxaban 20 mg once daily with food (15 mg once daily if CrCl 15–49 mL/min); dabigatran 150 mg twice daily, with lower doses for older or higher bleeding-risk patients according to local guidance.</p>
+              <p><strong>Renal function:</strong> review CrCl regularly and reduce dose or avoid if below thresholds for each agent; for example, avoid dabigatran if CrCl &lt;30 mL/min, rivaroxaban if CrCl &lt;15 mL/min, and consider alternative strategies when severe CKD is present.</p>
+              <p><strong>Interactions:</strong> strong CYP3A4 and/or P-gp inhibitors or inducers (e.g. some azoles, HIV therapies, rifampicin) can markedly alter effect.</p>
+            </article>
+            <article class="card">
+              <h3>Warfarin</h3>
+              <p><strong>Target INR:</strong> usually 2.0–3.0 (higher for some prosthetic valves).</p>
+              <p><strong>Monitor:</strong> frequent INR checks when initiating or changing interacting medications; counsel regarding consistent vitamin K intake.</p>
+              <p class="warning-text"><strong>Interactions:</strong> many drugs (e.g. antibiotics, azoles, amiodarone) and herbal products (e.g. St John’s wort) plus NSAIDs which increase bleeding risk.</p>
+            </article>
+          </div>
+        </section>
+
+        <!-- Renal -->
+        <section id="renal" class="condition-section">
+          <h2 class="section-title">Renal function & prescribing checklist</h2>
+          <p class="section-note">Use eGFR for staging CKD and creatinine clearance (CrCl) or local dosing guidelines for drug adjustment.</p>
+          <div class="card-grid">
+            <article class="card">
+              <h3>1. Assess kidney function</h3>
+              <ul>
+                <li>Check latest eGFR and trend; distinguish AKI from stable CKD.</li>
+                <li>Estimate CrCl (e.g. Cockcroft–Gault) when dosing drugs that reference CrCl.</li>
+                <li>In extremes of body size, very low or high muscle mass, or rapidly changing renal function, values may be unreliable – use measured CrCl or specialist advice.</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>2. Identify high-risk drugs</h3>
+              <ul>
+                <li>Renally cleared with narrow therapeutic index (e.g. digoxin, some antiarrhythmics, DOACs, aminoglycosides, vancomycin).</li>
+                <li>Nephrotoxic agents (e.g. NSAIDs, contrast media, some chemotherapy, high-dose diuretics).</li>
+                <li>Combinations that precipitate AKI – classic triple whammy: NSAID + ACEi/ARB + diuretic.</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>3. Adjust and monitor</h3>
+              <ul>
+                <li>Modify dose or dosing interval as per AMH/eTG or local protocol.</li>
+                <li>Repeat renal function after starting or increasing doses of ACEi/ARB, MRA, SGLT2 inhibitor or diuretics.</li>
+                <li>For AKI, hold nephrotoxic and renally cleared drugs where appropriate until recovery.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // Sidebar navigation
+    const buttons = document.querySelectorAll('.nav-btn');
+    const sections = document.querySelectorAll('.condition-section');
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.getAttribute('data-target');
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        sections.forEach(sec => {
+          sec.classList.toggle('active', sec.id === target);
+        });
+      });
+    });
+
+    // Patient context summary
+    const ctxPreg = document.getElementById('ctx-pregnant');
+    const ctxEgfr = document.getElementById('ctx-egfr');
+    const ctxHfref = document.getElementById('ctx-hfref');
+    const ctxSummary = document.getElementById('context-summary');
+
+    function updateContextSummary() {
+      if (!ctxSummary) return;
+      const flags = [];
+      if (ctxPreg && ctxPreg.checked) {
+        flags.push('Avoid ACEi/ARB and statins; use pregnancy-safe options for BP and angina.');
+      }
+      if (ctxEgfr && ctxEgfr.checked) {
+        flags.push('Review doses of renally cleared drugs (e.g. DOACs, digoxin, MRAs, fibrates) and avoid nephrotoxins.');
+      }
+      if (ctxHfref && ctxHfref.checked) {
+        flags.push('Prioritise HFrEF quadruple therapy; avoid non‑DHP CCBs and high-dose vasodilators without indication.');
+      }
+      if (flags.length === 0) {
+        ctxSummary.innerHTML = '<strong>Tips:</strong> toggle these if relevant to surface extra cautions (e.g. avoid ACEi/ARB & statins in pregnancy, adjust doses in severe CKD, avoid non‑DHP CCBs in HFrEF).';
+      } else {
+        ctxSummary.innerHTML = '<strong>Context alerts:</strong> ' + flags.join(' ');
+      }
+    }
+
+    [ctxPreg, ctxEgfr, ctxHfref].forEach(el => {
+      if (el) el.addEventListener('change', updateContextSummary);
+    });
+    updateContextSummary();
+
+    // CVD risk helper
+    const cvdSelect = document.getElementById('cvd-risk');
+    const cvdOutput = document.getElementById('cvd-risk-output');
+    if (cvdSelect && cvdOutput) {
+      function updateCvd() {
+        const v = cvdSelect.value;
+        let msg = '';
+        if (v === 'low') {
+          msg = 'Low risk: emphasise lifestyle; pharmacotherapy usually reserved for markedly elevated BP (e.g. ≥160/100) or additional indications.';
+        } else if (v === 'intermediate') {
+          msg = 'Intermediate risk: consider BP and lipid-lowering therapy, especially if BP ≥140/90 or other risk factors/organ damage are present.';
+        } else if (v === 'high' || v === 'clinical') {
+          msg = 'High or clinically high risk: BP- and lipid-lowering therapy are generally recommended unless contraindicated; aim for guideline targets.';
+        } else {
+          msg = '';
+        }
+        cvdOutput.textContent = msg;
+      }
+      cvdSelect.addEventListener('change', updateCvd);
+      updateCvd();
+    }
+
+    // CHA2DS2-VA calculator
+    const chaAge = document.getElementById('cha-age');
+    const chaChf = document.getElementById('cha-chf');
+    const chaHtn = document.getElementById('cha-htn');
+    const chaDiab = document.getElementById('cha-diabetes');
+    const chaStroke = document.getElementById('cha-stroke');
+    const chaVasc = document.getElementById('cha-vascular');
+    const chaOut = document.getElementById('cha-output');
+
+    function updateCha() {
+      if (!chaOut) return;
+      let score = 0;
+      if (chaAge) {
+        if (chaAge.value === '65-74') score += 1;
+        else if (chaAge.value === '75plus') score += 2;
+      }
+      if (chaChf && chaChf.checked) score += 1;
+      if (chaHtn && chaHtn.checked) score += 1;
+      if (chaDiab && chaDiab.checked) score += 1;
+      if (chaStroke && chaStroke.checked) score += 2;
+      if (chaVasc && chaVasc.checked) score += 1;
+      let rec = '';
+      if (score >= 2) {
+        rec = 'Oral anticoagulant is generally recommended, assuming acceptable bleeding risk.';
+      } else if (score === 1) {
+        rec = 'Consider anticoagulation; individualise based on bleeding risk and patient preferences.';
+      } else {
+        rec = 'No antithrombotic therapy is generally recommended for stroke prevention in AF.';
+      }
+      chaOut.innerHTML = 'CHA₂DS₂-VA score: <strong>' + score + '</strong>. ' + rec;
+    }
+
+    [chaAge, chaChf, chaHtn, chaDiab, chaStroke, chaVasc].forEach(el => {
+      if (el) el.addEventListener('change', updateCha);
+    });
+    updateCha();
+  </script>
+</body>
+</html>
